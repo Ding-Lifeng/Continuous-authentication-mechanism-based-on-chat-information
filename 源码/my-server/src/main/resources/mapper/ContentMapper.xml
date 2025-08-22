@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.server.mapper.ContentMapper">
+    <insert id="insertContent">
+        INSERT INTO chat_messages(uid, chatPartner_id, time, content, tag)
+        VALUES(#{uid}, #{chatPartner_id}, #{time}, #{content}, #{tag})
+    </insert>
+
+    <delete id="deleteContent">
+        DELETE FROM chat_messages
+        WHERE content_id = #{content_id} AND uid = #{uid}
+    </delete>
+
+    <update id="updateContent">
+        UPDATE chat_messages SET time = #{time}, content = #{content}
+        WHERE content_id = #{content_id} AND uid = #{uid}
+    </update>
+
+    <select id="getContentByChatPartner" resultType="com.example.server.entity.ChatContent">
+        SELECT * FROM chat_messages
+        WHERE
+        (uid = #{uid} AND chatPartner_id = #{chatPartnerId})
+        OR
+        (uid = #{chatPartnerId} AND chatPartner_id = #{uid})
+        ORDER BY time ASC
+    </select>
+
+    <select id="getLastContentByChatPartner" resultType="com.example.server.entity.ChatContent">
+        SELECT * FROM chat_messages
+        WHERE uid = #{uid} AND chatPartner_id = #{chatPartnerId}
+        ORDER BY time DESC
+        LIMIT 1
+    </select>
+
+    <select id="getHistoryByUid" resultType="com.example.server.entity.ChatContent">
+        SELECT * FROM chat_messages
+        WHERE uid = #{uid}
+    </select>
+
+    <update id="changeContentTag">
+        UPDATE chat_messages SET tag = 0
+        WHERE uid = #{uid} AND content = #{content}
+        ORDER BY time DESC
+        LIMIT 1
+    </update>
+
+    <update id="updateUserContent">
+        <![CDATA[
+            UPDATE chat_messages SET tag = 1
+            WHERE uid = #{uid} AND tag = 0 AND ABS(TIMESTAMPDIFF(SECOND, time, NOW())) < 180;
+        ]]>
+    </update>
+
+    <delete id="deleteOutOfDateContent">
+        <![CDATA[
+            DELETE FROM chat_messages
+            WHERE uid = #{uid} AND tag = 0 AND ABS(TIMESTAMPDIFF(SECOND, time, NOW())) >= 180;
+        ]]>
+    </delete>
+</mapper>

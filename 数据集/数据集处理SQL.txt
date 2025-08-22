@@ -1,0 +1,74 @@
+/*观察每个人的短信文本数据量的分布*/
+
+SELECT
+	CASE 
+		WHEN count BETWEEN 1 AND 9 THEN '1-9'
+		WHEN count BETWEEN 10 AND 19 THEN '10-19'
+		WHEN count BETWEEN 20 AND 29 THEN '20-29'
+		WHEN count BETWEEN 30 AND 49 THEN '30-49'
+		WHEN count BETWEEN 50 AND 99 THEN '50-99'
+		WHEN count BETWEEN 100 AND 499 THEN '100-499'
+		WHEN count > 500 THEN '500+'	
+		ELSE 'Unkonwn'
+	END AS quantity_range,
+	count(*) as count
+FROM(
+	SELECT sender, count(*) AS count
+	FROM new_sms_zh
+	GROUP BY sender
+) AS sender_counts
+GROUP BY quantity_range
+ORDER BY quantity_range;
+		
+/*统计短信作者数量*/
+
+SELECT count(DISTINCT sender) AS count
+FROM new_sms_zh
+
+/*统计数据集中发送者每天发送短信的频率*/
+
+SELECT frequency, count(DISTINCT sender) AS count
+from new_sms_zh
+GROUP BY frequency
+ORDER BY frequency;
+	
+/*统计短信作者的年龄分布*/
+
+SELECT age,count(DISTINCT sender) AS count
+from new_sms_zh
+GROUP BY age;
+
+/*查找单一作者生成文本数量的最大值*/
+
+SELECT sender,count(*) AS count
+FROM new_sms_zh
+GROUP BY sender
+ORDER BY count DESC;
+
+/*查找作者对应文本数量的众数*/
+
+SELECT record_count,count(*) AS count
+FROM (
+	SELECT count(*) AS record_count
+	from new_sms_zh
+	GROUP BY sender
+) as counts
+GROUP BY record_count
+ORDER BY count(*) DESC; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
